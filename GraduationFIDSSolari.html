@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNT Solari Split-Flap Board — Bradley John Sapit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --unt-green: #00853E;
+    --unt-dark-green: #04471F;
+    --unt-gold: #B8973F;
+    --board-casing: #101412;
+    --flap-bg: #1c231f;
+    --flap-border: #0a0d0b;
+    --text-color: #f5f4ed;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #080a09;
+    font-family: 'Space Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px 12px;
+    overflow-x: hidden;
+  }
+
+  .solari-board {
+    background: var(--board-casing);
+    border: 12px solid #1a221d;
+    border-radius: 10px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.9), inset 0 0 10px rgba(0,0,0,0.9);
+    padding: 16px 20px;
+    max-width: 1000px;
+    width: 100%;
+    position: relative;
+    user-select: none;
+  }
+
+  .solari-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 2px solid #222d26;
+  }
+
+  .solari-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--unt-green);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .solari-title span { color: var(--unt-gold); }
+
+  .audio-toggle {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    background: #1e2822;
+    color: var(--unt-gold);
+    border: 1px solid #334239;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .audio-toggle:hover { background: #2b3930; }
+
+  .board-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .row-wrapper {
+    display: flex;
+    align-items: center;
+    background: #141a16;
+    padding: 6px 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+
+  .row-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: #687e72;
+    width: 90px;
+    flex-shrink: 0;
+  }
+
+  .flaps-container {
+    display: flex;
+    gap: 3px;
+  }
+
+  .flap {
+    position: relative;
+    width: 24px;
+    height: 38px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 38px;
+    text-align: center;
+    perspective: 320px;
+  }
+
+  .flap-half {
+    position: absolute;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    background: var(--flap-bg);
+    color: var(--text-color);
+    box-shadow: inset 0 0 2px rgba(0,0,0,0.8);
+    backface-visibility: hidden;
+  }
+
+  .flap-half.top {
+    top: 0;
+    height: 50%;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom: 1px solid var(--flap-border);
+  }
+  .flap-half.top span {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 38px;
+    line-height: 38px;
+  }
+
+  .flap-half.bottom {
+    bottom: 0;
+    height: 50%;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-top: 1px solid var(--flap-border);
+  }
+  .flap-half.bottom span {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 38px;
+    line-height: 38px;
+  }
+
+  .flap::before, .flap::after {
+    content: '';
+    position: absolute;
+    top: calc(50% - 2px);
+    width: 2px;
+    height: 4px;
+    background: #0d120f;
+    z-index: 10;
+  }
+  .flap::before { left: -1px; }
+  .flap::after { right: -1px; }
+
+  .flap-leaf {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 50%;
+    overflow: hidden;
+    background: var(--flap-bg);
+    color: var(--text-color);
+    backface-visibility: hidden;
+    z-index: 2;
+    transform-origin: bottom center;
+  }
+  .flap-leaf.flip-down {
+    top: 0;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom: 1px solid var(--flap-border);
+    animation: flipDown 0.15s cubic-bezier(0.35, 0, 0.7, 1) forwards;
+  }
+  .flap-leaf span {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 38px;
+    line-height: 38px;
+  }
+
+  @keyframes flipDown {
+    0% { transform: rotateX(0deg); }
+    80% { transform: rotateX(-96deg); }
+    100% { transform: rotateX(-90deg); }
+  }
+
+  .board-footer {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 2px solid #222d26;
+    display: grid;
+    grid-template-columns: 210px 1fr 220px;
+    align-items: center;
+    gap: 16px;
+    font-size: 11px;
+    color: #687e72;
+    letter-spacing: 1px;
+  }
+
+  .footer-meta-left {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .footer-meta-right {
+    white-space: nowrap;
+    text-align: right;
+    color: #2ecc71;
+    font-weight: 700;
+  }
+
+  .footer-ticker-frame {
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    display: flex;
+    background: #0b0f0d;
+    padding: 4px 0;
+    border-radius: 3px;
+    border: 1px solid #1a241e;
+  }
+
+  .footer-ticker-text {
+    display: inline-block;
+    padding-left: 100%;
+    animation: ticker-slide 22s linear infinite;
+    color: var(--unt-gold);
+    font-weight: 700;
+    letter-spacing: 1.5px;
+  }
+
+  @keyframes ticker-slide {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+  }
+
+  @media (max-width: 768px) {
+    .flap { width: 15px; height: 26px; font-size: 17px; line-height: 26px; }
+    .flap-half.top span, .flap-half.bottom span, .flap-leaf span { height: 26px; line-height: 26px; }
+    .row-label { width: 65px; font-size: 10px; }
+    .board-footer {
+      grid-template-columns: 1fr;
+      gap: 8px;
+      text-align: center;
+    }
+    .footer-meta-right { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="solari-board">
+  <div class="solari-header">
+    <div class="solari-title">
+      <span>&#9992;</span> UNT DEPARTURES &bull; CLASS OF 2026
+    </div>
+    <button class="audio-toggle" id="audioBtn" onclick="toggleAudio()">Sound: OFF</button>
+  </div>
+
+  <div class="board-rows" id="boardRows"></div>
+
+  <div class="board-footer">
+    <div class="footer-meta-left">CARRIER: <span style="color:#f5f4ed;">MEAN GREEN EAGLES</span></div>
+    <div class="footer-ticker-frame">
+      <div class="footer-ticker-text">
+        &ldquo;A mile of highway will take you a mile. A mile of runway will take you anywhere.&rdquo;
+      </div>
+    </div>
+    <div class="footer-meta-right">STATUS: CLEARED FOR TAKEOFF</div>
+  </div>
+</div>
+
+<script>
+  const CHAR_SET = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-.:'/";
+  
+  const MESSAGES = [
+    [
+      "BRADLEY JOHN SAPIT       ",
+      "BS AVIATION LOGISTICS    ",
+      "FLIGHT UNT2026  16:00 HRS",
+      "GATE: COLISEUM / COL 154 ",
+      "STATUS: TAKEOFF CLEARED  "
+    ],
+    [
+      "MILESTONE ACHIEVED AT 47 ",
+      "BETTER LATE THAN NEVER   ",
+      "SEAT 47A - UNT BUSINESS  ",
+      "DESTINATION: WORLDWIDE   ",
+      "STATUS: PROMOTED TO GRAD "
+    ],
+    [
+      "BAGGAGE ADVISORY         ",
+      "NO GIFTS NECESSARY       ",
+      "YOUR PRESENCE IS UPGRADE ",
+      "DENTON TX - DEC 12 2026  ",
+      "STATUS: READY FOR TAXI   "
+    ]
+  ];
+
+  const LABELS = ["PASSENGER", "PROGRAM", "DEPARTURE", "TERMINAL", "REMARKS"];
+  const ROW_LENGTH = 25;
+  const boardRowsContainer = document.getElementById("boardRows");
+
+  let currentMsgIndex = 0;
+  let flapElements = [];
+  let audioCtx = null;
+  let audioEnabled = false;
+
+  function playClack() {
+    if (!audioEnabled) return;
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    const bufferSize = audioCtx.sampleRate * 0.02;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.15));
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 2200 + Math.random() * 300;
+    filter.Q.value = 2.8;
+
+    const highFilter = audioCtx.createBiquadFilter();
+    highFilter.type = 'peaking';
+    highFilter.frequency.value = 3100;
+    highFilter.gain.value = 6;
+
+    noise.connect(filter);
+    filter.connect(highFilter);
+    highFilter.connect(audioCtx.destination);
+    noise.start();
+  }
+
+  function toggleAudio() {
+    audioEnabled = !audioEnabled;
+    const btn = document.getElementById('audioBtn');
+    btn.textContent = audioEnabled ? "Sound: ON" : "Sound: OFF";
+    if (audioEnabled && !audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+
+  function setupBoard() {
+    boardRowsContainer.innerHTML = '';
+    flapElements = [];
+
+    LABELS.forEach((label, rowIndex) => {
+      const rowWrap = document.createElement("div");
+      rowWrap.className = "row-wrapper";
+
+      const rowLabel = document.createElement("div");
+      rowLabel.className = "row-label";
+      rowLabel.textContent = label;
+      rowWrap.appendChild(rowLabel);
+
+      const flapsContainer = document.createElement("div");
+      flapsContainer.className = "flaps-container";
+
+      flapElements[rowIndex] = [];
+
+      for (let col = 0; col < ROW_LENGTH; col++) {
+        const flap = document.createElement("div");
+        flap.className = "flap";
+        flap.innerHTML = `
+          <div class="flap-half top"><span class="top-char"> </span></div>
+          <div class="flap-half bottom"><span class="bottom-char"> </span></div>
+        `;
+        flapsContainer.appendChild(flap);
+
+        flapElements[rowIndex].push({
+          el: flap,
+          topText: flap.querySelector(".top-char"),
+          bottomText: flap.querySelector(".bottom-char"),
+          currentChar: ' '
+        });
+      }
+
+      rowWrap.appendChild(flapsContainer);
+      boardRowsContainer.appendChild(rowWrap);
+    });
+  }
+
+  function flipFlapTo(flapObj, targetChar, delay) {
+    setTimeout(() => {
+      if (flapObj.currentChar === targetChar) return;
+
+      function step() {
+        if (flapObj.currentChar === targetChar) return;
+
+        let currentIndex = CHAR_SET.indexOf(flapObj.currentChar);
+        let nextIndex = (currentIndex + 1) % CHAR_SET.length;
+        let nextChar = CHAR_SET[nextIndex];
+
+        const leaf = document.createElement("div");
+        leaf.className = "flap-leaf flip-down";
+        leaf.innerHTML = `<span>${flapObj.currentChar}</span>`;
+        flapObj.el.appendChild(leaf);
+
+        flapObj.currentChar = nextChar;
+        flapObj.topText.textContent = nextChar;
+
+        playClack();
+
+        setTimeout(() => {
+          flapObj.bottomText.textContent = nextChar;
+          leaf.remove();
+          step();
+        }, 160);
+      }
+
+      step();
+    }, delay);
+  }
+
+  function updateBoard(msgSet) {
+    msgSet.forEach((text, rowIndex) => {
+      const padded = text.padEnd(ROW_LENGTH, " ").toUpperCase();
+      for (let col = 0; col < ROW_LENGTH; col++) {
+        const target = padded[col] || ' ';
+        const delay = (col * 100) + (rowIndex * 180);
+        flipFlapTo(flapElements[rowIndex][col], target, delay);
+      }
+    });
+  }
+
+  setupBoard();
+  setTimeout(() => updateBoard(MESSAGES[0]), 500);
+
+  setInterval(() => {
+    currentMsgIndex = (currentMsgIndex + 1) % MESSAGES.length;
+    updateBoard(MESSAGES[currentMsgIndex]);
+  }, 16000);
+</script>
+
+</body>
+</html>
